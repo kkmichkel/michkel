@@ -1,0 +1,93 @@
+<template>
+  <el-form-item :label="label">
+    <el-input
+      v-model.trim="val"
+      :disabled="disabled"
+      :readonly="readonly"
+      :placeholder="placeholder"
+      :maxlength="maxLength"
+      :minlength="minLength"
+      :prefix-icon="prefixIcon"
+      :suffix-icon="suffixIcon"
+      @input="handleInput"
+      @blur="val = changeValue($event)"
+    ></el-input>
+  </el-form-item>
+</template>
+
+<script>
+export default {
+  name: 'InputChinese',
+  props: {
+    label: String, // 输入框关联的label文字
+    value: [String, Number],
+    disabled: { // 是否禁用
+      type: Boolean,
+      default: false
+    },
+    readonly: { // 是否只读
+      type: Boolean,
+      default: false
+    },
+    placeholder: { // 提示语
+      type: [String, Number],
+      default: '请输入'
+    },
+    maxLength: {
+      type: Number,
+      default: 32
+    }, // 最大长度
+    minLength: Number, // 最小长度
+    prefixIcon: String, // 输入框前置图标
+    suffixIcon: String, // 输入框后置图标
+    replaceNumber: {
+      type: Number,
+      default: 2
+    } // 中文转换字符比例
+  },
+  data() {
+    return {
+      val: this.value
+    }
+  },
+  watch: {
+    value: function(newVal) {
+      this.val = newVal
+    },
+    val: function(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.$emit('input', this.val)
+      }
+    }
+  },
+  methods: {
+    // 输入框限制输入（无闪动）
+    handleInput() {
+      const reg = /[\u4e00-\u9fa5]/
+      let length = 0 // 输入框内容长度
+      let overNumber = 0 // 超出限制长度次数
+      const strArr = this.val.split('')
+      for (let i = 0; i < strArr.length; i++) {
+        if (reg.test(strArr[i])) {
+          length = length + this.replaceNumber
+        } else {
+          length++
+        }
+        if (length > this.maxLength) {
+          overNumber++
+        }
+      }
+      if (length > this.maxLength) {
+        this.val = this.val.slice(0, this.val.length - overNumber)
+      }
+    },
+    changeValue(e) {
+      return e.target.value
+    }
+  }
+}
+</script>
+
+<style>
+
+</style>
